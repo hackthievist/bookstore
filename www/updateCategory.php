@@ -24,7 +24,8 @@ $name = $_SESSION['category_name'];
 
 		if(empty($error)) {
 			$clean = array_map('trim', $_POST);
-			$up = updateCategory($conn, $id);
+			$change = updateCategory($conn, $clean, $id);
+			header("Location: viewCategory.php?succesfully_changed");
 		}
 	}
 

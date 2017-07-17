@@ -100,9 +100,8 @@ function viewCategory($dbconn) {
 	while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
 		extract($row);
 
-		echo "<li>" . $row['category_name'] . "<a href=\"addProducts.php?id=$category_id&name=$category_name \">
-		<button>Add Products</button></a>" . 
-		"<a href=\"updateCategory.php?id=$category_id&name=$category_name\">
+		echo "<li>" . $row['category_name'] . "<a href=\"addProducts.php?id=$category_id&name=$category_name\">
+		<button>Add Products</button></a>" . "<a href=\"updateCategory.php?id=$category_id&name=$category_name\">
 		<button>Edit</button></a><a href=\"deleteProducts.php?id=$category_id&name=$category_name\">
 		&nbsp<button>Delete</button></a></li>";
 	}
@@ -150,12 +149,19 @@ function changeProduct($dbconn, $input, $id) {
 	$stmt->execute($data);
 }
 
-function updateCategory($dbconn, $id) {
+function updateCategory($dbconn, $input, $id) {
 	$st = $dbconn->prepare("UPDATE category SET category_name=:cn WHERE category_id = :cid");
 
-	$st->bindParam(":cid", $id);
+	$data = 
+			[":cn" => $input['new'],
+			 ":cid" => $id
+			];
 
-	$st->execute();
+	$st->execute($data);
+	$row = $st->fetch(PDO::FETCH_BOTH);
+	$cat[] = $row['category_name'];
+	$cat[] = $row['category_id'];
+	return $cat;
 }
 
 ?>
