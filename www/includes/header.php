@@ -10,5 +10,6 @@
 			<h1>T<span>SSB</span></h1>
 				<a href="addCategory.php">Add Category</a>
 				<a href="view.php">View Category</a>
+				<a href="viewBooks.php">View Books</a>
 		</div>
 	</section>

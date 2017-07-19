@@ -100,6 +100,7 @@ function viewCategory($dbconn) {
 	echo '<tr>
 	<th>S/N</th>
 	<th>Category Name</th>
+	<th>View Books</th>
 	<th>Edit</th>
 	<th>Delete</th>
 	<th>Add Products</th>
@@ -112,6 +113,7 @@ while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
 	<td>' . $counter . '</td>
 	<td>' . $category_name . '</td>
 
+	<td><a href="viewBooks.php?id='.$category_id.'&name='.$category_name.'">View</a></td>
 	<td><a href="updateCategory.php?id='.$category_id.'&name='.$category_name.'">Edit</a></td>
 	<td><a href="deleteCategory.php?id='.$category_id.'&name='.$category_name.'">Delete</a></td>
 	<td><a href="addProducts.php?id='.$category_id.'&name='.$category_name.'">Add</a></td>
@@ -129,8 +131,11 @@ function checkURL($dbconn) {
 }
 
 function addProducts($dbconn, $input, $id, $image) {
+	$st = $dbconn->prepare("SELECT * FROM books WHERE book_name = :bn");
 	$stmt = $dbconn->prepare("INSERT INTO books(book_name, author, publication_year, price, category_id, filepath)
 		VALUES(:bn, :au, :py, :pr, :cid, :fp)");
+
+	$dat = [":bn" => $input['title']];
 	$data = [
 	":bn" => $input['title'],
 	":au" => $input['author'],
@@ -140,7 +145,13 @@ function addProducts($dbconn, $input, $id, $image) {
 	":fp" => $image
 	];
 
-	$stmt->execute($data);
+	$st->execute($dat);
+
+	if($st->rowCount() == 0) {
+		$stmt->execute($data);
+	} else {
+		echo "Book already exists";
+	}
 }
 
 function changeProduct($dbconn, $input, $id) {
@@ -191,7 +202,7 @@ function viewBooks($dbconn) {
 
 	echo '<thead>
 	<tr>
-		<th>Book ID</th>
+		<th>S/N</th>
 		<th>Book Name</th>
 		<th>Image</th>
 		<th>Edit</th>
@@ -200,18 +211,20 @@ function viewBooks($dbconn) {
 	</tr>
 </thead>';
 
+$counter = 1;
 while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
 	extract($row);
 
 	$result .= '<tr>
-	<td>' . $book_id . '</td>
+	<td>' . $counter . '</td>
 	<td>' . $book_name . '&nbsp</td>
-	<td><img width="80px" src="'.$filepath.'"></td>
+	<td><img class="img-thumbnail" width="80px" src="'.$filepath.'"></td>
 
-	<td><a href="updateBook.php?id='.$book_id.'&name='.$book_name.'">Edit</a></td>
-	<td><a href="deleteBook.php?id='.$book_id.'&name='.$book_name.'">Delete</a></td>
+	<td><a href="editBooks.php?id='.$book_id.'&name='.$book_name.'">Edit</a></td>
+	<td><a href="deleteBooks.php?id='.$book_id.'&name='.$book_name.'">Delete</a></td>
 
 </tr>';
+$counter++;
 }
 
 return $result;
@@ -245,8 +258,8 @@ while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
 	<td>' . $book_name . '&nbsp</td>
 	<td><img width="80px" src="'.$filepath.'"></td>
 
-	<td><a href="updateBook.php?id='.$book_id.'&name='.$book_name.'">Edit</a></td>
-	<td><a href="deleteBook.php?id='.$book_id.'&name='.$book_name.'">Delete</a></td>
+	<td><a href="editBooks.php?id='.$book_id.'&name='.$book_name.'">Edit</a></td>
+	<td><a href="deleteBooks.php?id='.$book_id.'&name='.$book_name.'">Delete</a></td>
 
 </tr>';
 $counter++;
@@ -254,6 +267,61 @@ $counter++;
 
 return $result;
 
+}
+
+function updateBooks($dbconn, $input, $id, $destination) {
+	$st = $dbconn->prepare("SELECT * FROM books WHERE book_name = :bn");
+
+	$dat = [
+	":bn" => $input['title']
+	];
+
+	$st->execute($dat);
+
+	if($st->rowCount() == 0) {
+
+		echo "yes";
+		exit();
+
+		$stmt = $dbconn->prepare("UPDATE books SET book_name = :book_name, 
+			author = :auth,
+			publication_year = :py,
+			price = :pr,
+			filepath = :des");
+
+		$data = 
+		[":book_name" => $input['title'],
+		":auth" => $input['author'],
+		":py" => $input['year'],
+		":pr" => $input['price'],
+		":des" => $destination
+		];
+
+		$stmt->execute($data);
+	}
+}
+
+function deleteBooks($dbconn, $id) {
+	$stmt = $dbconn->prepare("DELETE FROM books WHERE book_id = :ix");
+	$data = [":ix" => $id];
+	$stmt->execute($data);
+}
+
+function displayBook($dbconn, $id) {
+	$result = "";
+	$stmt = $dbconn->prepare("SELECT * FROM books WHERE book_id = :bid");
+	$stmt->bindParam(":bid", $id);
+	$stmt->execute();
+	while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
+		extract($row);
+	}
+
+	$result .= '<img width="300px" style="height:300px" src="'.$filepath.'"/>
+	<p>Title: ' . $book_name . '</p>
+	<p>Author: ' . $author . '</p>
+	<p>Year: ' . $publication_year . '</p>
+	<p>Price: ' . $price. '</p>';
+	return $result;
 }
 
 ?>

@@ -17,9 +17,16 @@ authenticate();
 	<div id="stream">
 		<table id="tab">
 
-<?php
+			<?php
 
-			$b = viewBooks($conn);
-			echo $b;
-
+			if(isset($_GET['id']) && isset($_GET['name'])) {
+				$id = $_GET['id'];
+				$name = $_GET['name'];
+				$a = viewBooksByCategory($conn, $id);
+				echo $a;
+			} else {
+				$b = viewBooks($conn);
+				echo $b;
+			}
+			
 			?>

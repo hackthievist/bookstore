@@ -1,27 +1,22 @@
 <?php
 
 session_start();
-$page_title = "Add Products";
+$page_title = "Edit Book";
+
 
 include "includes/db.php";
 include "includes/header.php";
-include "includes/functions.php";
 include "includes/footer.php";
+include "includes/functions.php";
 
 authenticate();
+
 checkURL($conn);
 $id = $_SESSION['category_id'];
 $name = $_SESSION['category_name'];
 
 echo "Category: " . $name . "<br/>";
 echo "ID: " . $id . "<br/>";
-
-
-?>
-
-
-
-<?php
 
 
 if(array_key_exists('sub', $_POST)) {
@@ -61,7 +56,7 @@ if(array_key_exists('sub', $_POST)) {
 
 	if(empty($error)) {
 		$clean = array_map('trim', $_POST);
-		addProducts($conn, $clean, $id, $destination);
+		updateBooks($conn, $clean, $id, $destination);
 	} else {
 		foreach($error as $err) {
 			echo $err;
@@ -70,8 +65,8 @@ if(array_key_exists('sub', $_POST)) {
 
 }
 
-?>
 
+?>
 
 <form id="register" action="" method="post" enctype="multipart/form-data">
 
@@ -86,7 +81,7 @@ if(array_key_exists('sub', $_POST)) {
 	</div>
 
 	<div>
-	<label>Year:</label>
+		<label>Year:</label>
 		<input type="text" name="year" placeholder="Year">
 	</div>
 
@@ -100,4 +95,3 @@ if(array_key_exists('sub', $_POST)) {
 
 
 </form>
-
