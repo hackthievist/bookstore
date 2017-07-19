@@ -92,23 +92,33 @@ function addCategory($dbconn, $input) {
 }
 
 function viewCategory($dbconn) {
-	$cat = [];
+	$result = "";
 	$stmt = $dbconn->prepare("SELECT * FROM category");
 	$stmt->execute();
-	
-	echo "<ul>";
-	while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
-		extract($row);
+	$counter = 1;
 
-		echo "<li>" . $row['category_name'] . "<a href=\"addProducts.php?id=$category_id&name=$category_name\">
-		<button>Add Products</button></a>" . "<a href=\"updateCategory.php?id=$category_id&name=$category_name\">
-		<button>Edit</button></a><a href=\"deleteProducts.php?id=$category_id&name=$category_name\">
-		&nbsp<button>Delete</button></a></li>";
-	}
-	echo "</ul>";
-	$cat[] = true;
-	$cat[] = $row['category_id'];
-	return $cat;
+	echo '<tr>
+	<th>S/N</th>
+	<th>Category Name</th>
+	<th>Edit</th>
+	<th>Delete</th>
+	<th>Add Products</th>
+</tr>
+</thead>';
+
+while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
+	extract($row);
+	$result .= '<tr>
+	<td>' . $counter . '</td>
+	<td>' . $category_name . '</td>
+
+	<td><a href="updateCategory.php?id='.$category_id.'&name='.$category_name.'">Edit</a></td>
+	<td><a href="deleteCategory.php?id='.$category_id.'&name='.$category_name.'">Delete</a></td>
+	<td><a href="addProducts.php?id='.$category_id.'&name='.$category_name.'">Add</a></td>
+</tr>';
+$counter++;
+}
+return $result;
 }
 
 function checkURL($dbconn) {
@@ -118,15 +128,16 @@ function checkURL($dbconn) {
 	}
 }
 
-function addProducts($dbconn, $input, $id) {
-	$stmt = $dbconn->prepare("INSERT INTO books(book_name, author, publication_year, price, category_id)
-		VALUES(:bn, :au, :py, :pr, :cid)");
+function addProducts($dbconn, $input, $id, $image) {
+	$stmt = $dbconn->prepare("INSERT INTO books(book_name, author, publication_year, price, category_id, filepath)
+		VALUES(:bn, :au, :py, :pr, :cid, :fp)");
 	$data = [
 	":bn" => $input['title'],
 	":au" => $input['author'],
 	":py" => $input['year'],
 	":pr" => $input['price'],
-	":cid" => $id
+	":cid" => $id,
+	":fp" => $image
 	];
 
 	$stmt->execute($data);
@@ -153,15 +164,96 @@ function updateCategory($dbconn, $input, $id) {
 	$st = $dbconn->prepare("UPDATE category SET category_name=:cn WHERE category_id = :cid");
 
 	$data = 
-			[":cn" => $input['new'],
-			 ":cid" => $id
-			];
+	[":cn" => $input['new'],
+	":cid" => $id
+	];
 
 	$st->execute($data);
 	$row = $st->fetch(PDO::FETCH_BOTH);
 	$cat[] = $row['category_name'];
 	$cat[] = $row['category_id'];
 	return $cat;
+}
+
+function deleteCategory($dbconn, $id) {
+	$stmt = $dbconn->prepare("DELETE FROM category WHERE category_id = :id");
+	$st = $dbconn->prepare("DELETE FROM books WHERE category_id = :ix");
+	$stmt->bindParam(":id", $id);
+	$data = [":ix" => $id];
+	$stmt->execute();
+	$st->execute($data);
+}
+
+function viewBooks($dbconn) {
+	$result = "";
+	$stmt = $dbconn->prepare("SELECT * FROM books");
+	$stmt->execute();
+
+	echo '<thead>
+	<tr>
+		<th>Book ID</th>
+		<th>Book Name</th>
+		<th>Image</th>
+		<th>Edit</th>
+		<th>Delete</th>
+		
+	</tr>
+</thead>';
+
+while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
+	extract($row);
+
+	$result .= '<tr>
+	<td>' . $book_id . '</td>
+	<td>' . $book_name . '&nbsp</td>
+	<td><img width="80px" src="'.$filepath.'"></td>
+
+	<td><a href="updateBook.php?id='.$book_id.'&name='.$book_name.'">Edit</a></td>
+	<td><a href="deleteBook.php?id='.$book_id.'&name='.$book_name.'">Delete</a></td>
+
+</tr>';
+}
+
+return $result;
+
+}
+
+function viewBooksByCategory($dbconn, $id) {
+	$result = "";
+	$stmt = $dbconn->prepare("SELECT * FROM books WHERE category_id =:id");
+	$stmt->bindParam(":id", $id);
+	$stmt->execute();
+	
+
+	echo '<thead>
+	<tr>
+		<th>S/N</th>
+		<th>Book Name</th>
+		<th>Image</th>
+		<th>Edit</th>
+		<th>Delete</th>
+		
+	</tr>
+</thead>';
+
+$counter = 1;
+while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
+	extract($row);
+
+	$result .= '<tr>
+	<td>' . $counter . '</td>
+	<td>' . $book_name . '&nbsp</td>
+	<td><img width="80px" src="'.$filepath.'"></td>
+
+	<td><a href="updateBook.php?id='.$book_id.'&name='.$book_name.'">Edit</a></td>
+	<td><a href="deleteBook.php?id='.$book_id.'&name='.$book_name.'">Delete</a></td>
+
+</tr>';
+$counter++;
+}
+
+return $result;
+
 }
 
 ?>

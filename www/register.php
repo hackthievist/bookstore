@@ -4,6 +4,7 @@ $page_title = "Admin Register";
 include "includes/db.php";
 include "includes/header.php";
 include "includes/functions.php";
+include "includes/footer.php";
 ?>
 
 <div class="wrapper">
@@ -81,10 +82,4 @@ include "includes/functions.php";
 
 			<h4 class="jumpto">Have an account? <a href="login.php">login</a></h4>
 		</div>
-
-		<?php
-
-		include "includes/footer.php";
-
-		?>
 

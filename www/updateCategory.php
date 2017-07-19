@@ -1,7 +1,7 @@
 <?php
 
 session_start();
-$page_title = "Add Products";
+$page_title = "Update Category";
 
 
 include "includes/db.php";
@@ -25,15 +25,16 @@ $name = $_SESSION['category_name'];
 		if(empty($error)) {
 			$clean = array_map('trim', $_POST);
 			$change = updateCategory($conn, $clean, $id);
-			header("Location: viewCategory.php?succesfully_changed");
+			header("Location: view.php?succesfully_changed");
 		}
 	}
 
 ?>
 
-<form action="" method="post">
+<form id="register" action="" method="post">
 	<p>Current Category Name: <?php echo $name ?> </p>
-	<p><input type="text" name="new" placeholder="New Name"></p>
+	<br/>
+	<p>New Category Name:<input type="text" name="new" placeholder="New Name"></p>
 	<input type="submit" name="sub" value="Update">
 
 </form>

@@ -43,9 +43,9 @@ authenticate();
 
 	?>
 
-	<form action="" method="post">
+	<form id="register" action="" method="post">
 		<p>Category Name: <input type="text" name="category_name"></p>
-		<input type="submit" name="submit" value="Add Category">
+		<input type="submit" name="submit" value="Add">
 	</form>
 
 </body>
