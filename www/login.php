@@ -8,7 +8,7 @@ include "includes/functions.php";
 ?>
 
 <div class="wrapper">
-	<h1 id="register-label">Admin Register</h1>
+	<h1 id="register-label">Admin Login</h1>
 	<hr/>
 
 	<?php

@@ -17,36 +17,37 @@ authenticate();
 	<title><?php echo $page_title ?></title>
 </head>
 <body>
+	<div class="wrapper">
+		<div id="stream">
+			<?php
 
-	<?php
+			$error = [];
 
-	$error = [];
+			if(array_key_exists('submit', $_POST)) {
+				if(empty($_POST['category_name'])) {
+					$error['category_name'] = "Please enter category name";
+				}
 
-	if(array_key_exists('submit', $_POST)) {
-		if(empty($_POST['category_name'])) {
-			$error['category_name'] = "Please enter category name";
-		}
+				if(empty($error)) {
+					$clean = array_map('trim', $_POST);
+					$add = addCategory($conn, $clean);
 
-		if(empty($error)) {
-			$clean = array_map('trim', $_POST);
-			$add = addCategory($conn, $clean);
+					if($add[0]) {
+						$_SESSION['category_id'] = $add[1];
+						header("Location:addCategory.php?successfully added");
+					} else {
+						header("Location: addCategory.php?err");
+					}
+				}
 
-			if($add[0]) {
-				$_SESSION['category_id'] = $add[1];
-				header("Location:addCategory.php?successfully added");
-			} else {
-				header("Location: addCategory.php?err");
 			}
-		}
 
-	}
+			?>
 
-	?>
+			<form id="register" action="" method="post">
+				<p>Category Name: <input type="text" name="category_name"></p>
+				<input type="submit" name="submit" value="Add">
+			</form>
 
-	<form id="register" action="" method="post">
-		<p>Category Name: <input type="text" name="category_name"></p>
-		<input type="submit" name="submit" value="Add">
-	</form>
-
-</body>
-</html>
+		</body>
+		</html>

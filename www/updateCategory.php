@@ -15,26 +15,28 @@ $id = $_SESSION['category_id'];
 $name = $_SESSION['category_name'];
 
 
-	if(array_key_exists('sub', $_POST)) {
-		$error = [];
+if(array_key_exists('sub', $_POST)) {
+	$error = [];
 
-		if(empty($_POST['new'])) {
-			$error[] = "Please enter a new name";
-		}
-
-		if(empty($error)) {
-			$clean = array_map('trim', $_POST);
-			$change = updateCategory($conn, $clean, $id);
-			header("Location: view.php?succesfully_changed");
-		}
+	if(empty($_POST['new'])) {
+		$error[] = "Please enter a new name";
 	}
+
+	if(empty($error)) {
+		$clean = array_map('trim', $_POST);
+		$change = updateCategory($conn, $clean, $id);
+		header("Location: view.php?succesfully_changed");
+	}
+}
 
 ?>
 
-<form id="register" action="" method="post">
-	<p>Current Category Name: <?php echo $name ?> </p>
-	<br/>
-	<p>New Category Name:<input type="text" name="new" placeholder="New Name"></p>
-	<input type="submit" name="sub" value="Update">
+<div class="wrapper">
+	<div id="stream">
+			<form id="register" action="" method="post">
+				<p>Current Category Name: <?php echo $name ?> </p>
+				<br/>
+				<p>New Category Name:<input type="text" name="new" placeholder="New Name"></p>
+				<input type="submit" name="sub" value="Update">
 
-</form>
+			</form>

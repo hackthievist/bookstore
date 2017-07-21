@@ -20,8 +20,8 @@ if(isset($_GET['id']) && isset($_GET['name'])) {
 
 $id = $_SESSION['book_id'];
 $name = $_SESSION['book_name'];
-echo "Category: " . $name . "<br/>";
-echo "ID: " . $id . "<br/>";
+//echo "Category: " . $name . "<br/>";
+//echo "ID: " . $id . "<br/>";
 
 ?>
 
@@ -46,6 +46,7 @@ echo "ID: " . $id . "<br/>";
 				<p> Are you sure you want to delete this book? 
 					<button style="width:70px; border: 1px solid; padding: 5px; border-radius: 5px; cursor: pointer" name="yes">Yes</button>
 					<button style="width:70px; border: 1px solid; padding: 5px; border-radius: 5px; cursor: pointer" name="no">No</button> </p>
+					<br/><br/>
 
 				</form>
 

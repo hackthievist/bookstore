@@ -1,3 +1,4 @@
 .vagrant/
 test.php
 Vagrantfile
+book images/

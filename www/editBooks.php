@@ -15,8 +15,8 @@ checkURL($conn);
 $id = $_SESSION['category_id'];
 $name = $_SESSION['category_name'];
 
-echo "Category: " . $name . "<br/>";
-echo "ID: " . $id . "<br/>";
+//echo "Title: " . $name . "<br/>";
+//echo "ID: " . $id . "<br/>";
 
 
 if(array_key_exists('sub', $_POST)) {
@@ -68,30 +68,33 @@ if(array_key_exists('sub', $_POST)) {
 
 ?>
 
-<form id="register" action="" method="post" enctype="multipart/form-data">
 
-	<div>
-		<label>Book Title:</label>
-		<input type="text" name="title" placeholder="Book Title">
-	</div>
+<div class="wrapper">
+	<div id="stream">
+		<form id="register" action="" method="post" enctype="multipart/form-data">
 
-	<div>
-		<label>Author:</label>
-		<input type="text" name="author" placeholder="Author">
-	</div>
+			<div>
+				<label>Book Title:</label>
+				<input type="text" name="title" placeholder="Book Title">
+			</div>
 
-	<div>
-		<label>Year:</label>
-		<input type="text" name="year" placeholder="Year">
-	</div>
+			<div>
+				<label>Author:</label>
+				<input type="text" name="author" placeholder="Author">
+			</div>
 
-	<div>
-		<label>Price:</label>
-		<input type="text" name="price" placeholder="Price">
-	</div>
+			<div>
+				<label>Year:</label>
+				<input type="text" name="year" placeholder="Year">
+			</div>
 
-	<p><input type="file" name="pic"></p>
-	<input type="submit" name="sub" value="Upload">
+			<div>
+				<label>Price:</label>
+				<input type="text" name="price" placeholder="Price">
+			</div>
+
+			<p><input type="file" name="pic"></p>
+			<input type="submit" name="sub" value="Upload">
 
 
-</form>
+		</form>

@@ -205,6 +205,7 @@ function viewBooks($dbconn) {
 		<th>S/N</th>
 		<th>Book Name</th>
 		<th>Image</th>
+		<th>Price</th>
 		<th>Edit</th>
 		<th>Delete</th>
 		
@@ -219,6 +220,7 @@ while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
 	<td>' . $counter . '</td>
 	<td>' . $book_name . '&nbsp</td>
 	<td><img class="img-thumbnail" width="80px" src="'.$filepath.'"></td>
+	<td>' . "₦" .$price. '</td>
 
 	<td><a href="editBooks.php?id='.$book_id.'&name='.$book_name.'">Edit</a></td>
 	<td><a href="deleteBooks.php?id='.$book_id.'&name='.$book_name.'">Delete</a></td>
@@ -316,7 +318,7 @@ function displayBook($dbconn, $id) {
 		extract($row);
 	}
 
-	$result .= '<img width="300px" style="height:300px" src="'.$filepath.'"/>
+	$result .= '<img width="300px" style="height:400px" src="'.$filepath.'"/>
 	<p>Title: ' . $book_name . '</p>
 	<p>Author: ' . $author . '</p>
 	<p>Year: ' . $publication_year . '</p>
