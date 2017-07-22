@@ -326,4 +326,47 @@ function displayBook($dbconn, $id) {
 	return $result;
 }
 
+function fetchBooks($dbconn) {
+	$result = "";
+	$stmt = $dbconn->prepare("SELECT * FROM books");
+	$stmt->execute();
+
+	$row_counter = 1;
+	$result .= '<div class="container">
+	<div class="row">';
+		while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
+			extract($row);
+
+			if(($row_counter % 5) == 0) {
+				$result .= '<div class="row">';
+				$row_counter = 1;
+			}
+
+			$result .= 
+			'<div class="col-md-3">
+			<center>
+				<img style="min-height: 350px; height: 350px" class="img-thumbnail" src="'.$filepath.'"/>
+			</center>
+			<div class="caption">
+				<p class="title">'.$book_name.'</p>
+				<p>'.$author.'</p>
+				<p>₦'.$price.'</p>
+				<a href="cart.php?id='.$book_id.'"><button>Add To Cart</button></a>
+			</div>
+
+		</div>';
+
+		if($row_counter % 5 == 0) {
+			$result .= '</div>';
+		}
+
+		$row_counter++;
+	}
+	return $result;
+}
+
+/*function addToCart($dbconn, $id) {
+	$stmt->prepare("INSERT INTO cart VALUES(NULL, :cid,  ) WHERE customer_id = :cid");
+}*/
+
 ?>
