@@ -17,7 +17,7 @@ function doesEmailExist($dbconn, $input) {
 
 }
 
-function insertInto($dbconn, $clean) {
+function insertIntoAdmin($dbconn, $clean) {
 
 	$hash = password_hash($clean['password'], PASSWORD_BCRYPT);
 
@@ -33,6 +33,33 @@ function insertInto($dbconn, $clean) {
 	];
 
 	$stmt->execute($data);
+}
+
+function insertIntoCustomer($dbconn, $clean) {
+
+	$hash = password_hash($clean['password'], PASSWORD_BCRYPT);
+
+	$stmt = $dbconn->prepare("INSERT INTO customer(first_name, last_name, email, password, hash) VALUES (:fn, :ln, :em, :pw, :pwrd)");
+	$data = [
+
+	":fn" => $clean['fname'],
+	":ln" => $clean['lname'],
+	":em" => $clean['email'],
+	":pw" => $clean['password'],
+	":pwrd" => $hash
+
+	];
+
+	$stmt->execute($data);
+}
+
+function fetchName($dbconn, $cid) {
+	$stmt = $dbconn->prepare("SELECT * FROM customer WHERE customer_id = :cid");
+	$stmt->bindParam(":cid", $cid);
+	$stmt->execute();
+	$row = $stmt->fetch(PDO::FETCH_BOTH);
+	extract($row);
+	echo $last_name . ", " . $first_name;
 }
 
 
@@ -60,6 +87,27 @@ function login($dbconn, $input) {
 
 			$result[] = true;
 			$result[] = $row['admin_id'];
+			return $result;
+		}
+	}
+	
+
+}
+
+function customerLogin($dbconn, $input) {
+	$result = array();
+
+	$stmt = $dbconn->prepare("SELECT * FROM customer WHERE email = :email"); 
+	$stmt->bindParam(":email", $input['email']);
+	$stmt->execute(); 
+	$row = $stmt->fetch(PDO::FETCH_BOTH);
+
+
+	if($stmt->rowCount() > 0) {
+		if(password_verify($input['password'], $row['hash'])) {
+
+			$result[] = true;
+			$result[] = $row['customer_id'];
 			return $result;
 		}
 	}
@@ -365,8 +413,79 @@ function fetchBooks($dbconn) {
 	return $result;
 }
 
-/*function addToCart($dbconn, $id) {
-	$stmt->prepare("INSERT INTO cart VALUES(NULL, :cid,  ) WHERE customer_id = :cid");
-}*/
+function addToCart($dbconn, $cid, $bid) {
+	$s = $dbconn->prepare("SELECT * FROM cart WHERE book_id = :bid AND customer_id = :cid");
+	$st = $dbconn->prepare("SELECT * FROM books WHERE book_id = :bid");
+	$stmt = $dbconn->prepare("INSERT INTO cart(customer_id, book_id, quantity) VALUES(:cid, :bid, :quan)");
+	$st->bindParam(":bid", $bid);
+
+	$dat = 
+	[":bid" => $bid,
+	":cid" => $cid
+	];
+
+	$s->execute($dat);
+
+	if($s->rowCount() > 0) {
+		$up = $dbconn->prepare("UPDATE cart SET quantity = quantity + 1 WHERE customer_id = :cid AND book_id = :bid");
+		$val = 
+		[":bid" => $bid,
+		":cid" => $cid
+		];
+
+		$up->execute($val);
+
+	} else {
+
+		$st->execute();
+
+		$row = $st->fetch(PDO::FETCH_BOTH);
+		extract($row);
+
+		$quantity = 1;
+
+		$data = 
+		[":cid" => $cid,
+		":bid" => $bid,
+		":quan" => $quantity
+		];
+
+		$stmt->execute($data);
+	}
+}
+
+function viewCart($dbconn, $cid) {
+	$result = [];
+	$arr = [];
+	$stmt = $dbconn->prepare("SELECT * FROM cart WHERE customer_id = :cid");
+	$stmt->bindParam(":cid", $cid);
+	$stmt->execute();
+
+	while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
+		extract($row);
+		$result[] = $book_id;
+	}
+
+	$counter = 0;
+
+	echo '<tr><th>S/N</th>
+	<th>Title</th>
+	<th>Author</th>
+	<th>Image</th>
+	<th>Price<td>
+	</tr>';
+	
+	foreach($result as $res) {
+		$counter++;
+		$st = $dbconn->prepare("SELECT * FROM books WHERE book_id = :bid");
+		$st->bindParam(":bid", $res);
+		$st->execute();
+		$fetch = $st->fetch(PDO::FETCH_BOTH);
+		extract($fetch);
+		echo '<td>'.$counter.'</td>
+		<td>'.$book_name.'</td>
+	</tr>';
+}
+}
 
 ?>

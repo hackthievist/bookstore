@@ -1,6 +1,6 @@
 <?php
 
-$page_title = "Admin Register";
+$page_title = "Customer Register";
 include "includes/db.php";
 include "includes/header.php";
 include "includes/functions.php";
@@ -8,7 +8,7 @@ include "includes/footer.php";
 ?>
 
 <div class="wrapper">
-	<h1 id="register-label">Admin Register</h1>
+	<h1 id="register-label">Customer Register</h1>
 	<hr>
 
 	<?php
@@ -41,7 +41,7 @@ include "includes/footer.php";
 		if(empty($error)) {
 					//database stuff
 					$clean = array_map('trim', $_POST);  //trims whitespace
-					insertIntoAdmin($conn, $clean);
+					insertIntoCustomer($conn, $clean);
 
 				} 
 
@@ -55,29 +55,29 @@ include "includes/footer.php";
 					$display = displayErrors($error, 'fname');
 					echo $display;
 					?>
-					<label>first name:</label>
+					<label>First Name:</label>
 					<input type="text" name="fname" placeholder="First Name">
 				</div>
 				<div>
-					<label>last name:</label>	
+					<label>Last Name:</label>	
 					<input type="text" name="lname" placeholder="Last Name">
 				</div>
 
 				<div>
-					<label>email:</label>
+					<label>Email:</label>
 					<input type="text" name="email" placeholder="email">
 				</div>
 				<div>
-					<label>password:</label>
-					<input type="password" name="password" placeholder="password">
+					<label>Password:</label>
+					<input type="password" name="password" placeholder="Password">
 				</div>
 
 				<div>
-					<label>confirm password:</label>	
-					<input type="password" name="pword" placeholder="password">
+					<label>Confirm Password:</label>	
+					<input type="password" name="pword" placeholder="Confirm Password">
 				</div>
 
-				<input type="submit" name="register" value="register">
+				<input type="submit" name="register" value="Register">
 			</form>
 
 			<h4 class="jumpto">Have an account? <a href="login.php">login</a></h4>
