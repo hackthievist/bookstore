@@ -20,7 +20,7 @@ include 'style.html';
 	.nav {
 		width: 100%;
 		height: 90px;
-		background-color: CadetBlue;
+		background-color: #2980b9;
 		box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.18);
 		position: fixed;
 		z-index: 999;

@@ -415,9 +415,7 @@ function fetchBooks($dbconn) {
 
 function addToCart($dbconn, $cid, $bid) {
 	$s = $dbconn->prepare("SELECT * FROM cart WHERE book_id = :bid AND customer_id = :cid");
-	$st = $dbconn->prepare("SELECT * FROM books WHERE book_id = :bid");
-	$stmt = $dbconn->prepare("INSERT INTO cart(customer_id, book_id, quantity) VALUES(:cid, :bid, :quan)");
-	$st->bindParam(":bid", $bid);
+	
 
 	$dat = 
 	[":bid" => $bid,
@@ -425,6 +423,9 @@ function addToCart($dbconn, $cid, $bid) {
 	];
 
 	$s->execute($dat);
+
+	$st = $dbconn->prepare("SELECT * FROM books WHERE book_id = :bid");
+	$st->bindParam(":bid", $bid);
 
 	if($s->rowCount() > 0) {
 		$up = $dbconn->prepare("UPDATE cart SET quantity = quantity + 1 WHERE customer_id = :cid AND book_id = :bid");
@@ -437,20 +438,16 @@ function addToCart($dbconn, $cid, $bid) {
 
 	} else {
 
-		$st->execute();
-
-		$row = $st->fetch(PDO::FETCH_BOTH);
-		extract($row);
-
-		$quantity = 1;
+		$stmt = $dbconn->prepare("INSERT INTO cart(customer_id, book_id, quantity) VALUES(:cid, :bid, 1)");
 
 		$data = 
 		[":cid" => $cid,
-		":bid" => $bid,
-		":quan" => $quantity
+		":bid" => $bid
 		];
 
 		$stmt->execute($data);
+		//$row = $st->fetch(PDO::FETCH_BOTH);
+		//extract($row);
 	}
 }
 
@@ -464,6 +461,7 @@ function viewCart($dbconn, $cid) {
 	while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
 		extract($row);
 		$result[] = $book_id;
+		$arr[] = $quantity;
 	}
 
 	$counter = 0;
@@ -472,20 +470,39 @@ function viewCart($dbconn, $cid) {
 	<th>Title</th>
 	<th>Author</th>
 	<th>Image</th>
-	<th>Price<td>
+	<th>Price</th>
+	<th>Quantity</th>
+	<th>Total Price</th>
+</tr>';
+
+$x = 0;
+foreach($result as $res) {
+	global $total;
+	$y = $arr[$x];
+	$counter++;
+	$st = $dbconn->prepare("SELECT * FROM books WHERE book_id = :bid");
+	$st->bindParam(":bid", $res);
+	$st->execute();
+	$fetch = $st->fetch(PDO::FETCH_BOTH);
+	extract($fetch);
+	echo '<td>'.$counter.'</td>
+	<td>'.$book_name.'</td>
+	<td>'.$author.'</td>
+	<td><img style="min-height: 150px; height: 150px" width="100px" src="'.$filepath.'"/>
+		<td>₦'.$price.'</td>
+		<td>'.$y.'</td>
+		<td>'.$price*$y.'</td>
 	</tr>';
-	
-	foreach($result as $res) {
-		$counter++;
-		$st = $dbconn->prepare("SELECT * FROM books WHERE book_id = :bid");
-		$st->bindParam(":bid", $res);
-		$st->execute();
-		$fetch = $st->fetch(PDO::FETCH_BOTH);
-		extract($fetch);
-		echo '<td>'.$counter.'</td>
-		<td>'.$book_name.'</td>
-	</tr>';
+	$total += $price*$y;
+	$x++;
+
 }
+
+
+echo '<tr>
+<td></td><td></td><td></td><td></td><td></td><td></td><th>'.$total.'</th>
+</tr>';
+
 }
 
 ?>
