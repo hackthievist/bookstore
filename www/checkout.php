@@ -1,16 +1,17 @@
 <?php
+
 session_start();
-$page_title = "View Cart";
 include 'includes/db.php';
 include 'includes/functions.php';
 include 'style.html';
 $id = $_SESSION['customer_id'];
 
+if(isset($_GET['id'])) {
+	$cid = $_GET['id'];
+}
+
+checkout($conn, $cid);
+header("Location: view_cart.php");
+
+
 ?>
-
-		<table class="mytable" id="tab">
-
-			<?php
-			viewCart($conn, $id);
-
-			?>

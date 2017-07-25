@@ -264,6 +264,11 @@ form#register input[type="submit"] {
 }
 
 #stream.tab { width: 960px; }
+
+table {
+	clear: both;
+}
+
 table#tab {
 	width: 100%;
 	/*border: 1px solid #ccc;*/

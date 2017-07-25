@@ -454,7 +454,7 @@ function addToCart($dbconn, $cid, $bid) {
 function viewCart($dbconn, $cid) {
 	$result = [];
 	$arr = [];
-	$stmt = $dbconn->prepare("SELECT * FROM cart WHERE customer_id = :cid");
+	$stmt = $dbconn->prepare("SELECT * FROM cart WHERE customer_id = :cid AND quantity > 0");
 	$stmt->bindParam(":cid", $cid);
 	$stmt->execute();
 
@@ -466,14 +466,20 @@ function viewCart($dbconn, $cid) {
 
 	$counter = 0;
 
-	echo '<tr><th>S/N</th>
-	<th>Title</th>
-	<th>Author</th>
-	<th>Image</th>
-	<th>Price</th>
-	<th>Quantity</th>
-	<th>Total Price</th>
-</tr>';
+	if($stmt->rowCount() > 0) {
+		echo '<tr><th>S/N</th>
+		<th>Title</th>
+		<th>Author</th>
+		<th>Image</th>
+		<th>Price</th>
+		<th>Quantity</th>
+		<th>Add</th>
+		<th>Remove</th>
+		<th>Delete Item</th>
+		<th>Total Price</th>
+		<th></th>
+	</tr>';
+}
 
 $x = 0;
 foreach($result as $res) {
@@ -485,24 +491,71 @@ foreach($result as $res) {
 	$st->execute();
 	$fetch = $st->fetch(PDO::FETCH_BOTH);
 	extract($fetch);
-	echo '<td>'.$counter.'</td>
+	echo '<tr>
+	<td>'.$counter.'</td>
 	<td>'.$book_name.'</td>
 	<td>'.$author.'</td>
-	<td><img style="min-height: 150px; height: 150px" width="100px" src="'.$filepath.'"/>
-		<td>₦'.$price.'</td>
-		<td>'.$y.'</td>
-		<td>'.$price*$y.'</td>
-	</tr>';
-	$total += $price*$y;
-	$x++;
+	<td><img style="min-height: 150px; height: 150px; width: 100px" src="'.$filepath.'"/></td>
+	<td>₦'.$price.'</td>
+	<td>'.$y.'</td>
+	<td><a style="border: none" href="addItem.php?id='.$res.'"><img style= "width:25px" src="add.png"/></a></td>
+	<td><a style="border: none" href="removeCartItem.php?id='.$res.'"><img style= "width:25px" src="minus.png"/></a></td>
+	<td><a style="border: none" href="deleteCartItem.php?id='.$res.'"><img style= "width:25px" src="trashb.png"/></a></td>
+	<td>₦'.$price*$y.'</td>
+	<td></td>
+
+</tr>';
+$total += $price*$y;
+$x++;
 
 }
 
-
-echo '<tr>
-<td></td><td></td><td></td><td></td><td></td><td></td><th>'.$total.'</th>
+if($stmt->rowCount() > 0) {
+	echo '<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+	<td></td>
+	<td></td>
+	<td></td>
+	<td></td>
+	<td></td>
+	<td></td>
+	<th>₦'.$total.'</th>
+	<td><a style="border: none" href="checkout.php?id='.$cid.'"><button style="width: 70px; text-align: center; border: 1px solid grey; padding: 5px; border-radius: 5px; margin-left: 0">Checkout</button></a></td>
 </tr>';
 
+} else {
+	echo '<div style="text-align:center; position: relative; top: 150px;"><h1>Cart Empty</h1></div>';
+}
+}
+
+function deleteCartItem($dbconn, $cid, $bid) {
+	$stmt = $dbconn->prepare("DELETE FROM cart WHERE customer_id = :cid AND book_id = :bid");
+	$data = [":cid" => $cid, ":bid" => $bid];
+	$stmt->execute($data);
+}
+
+function removeCartItem($dbconn, $cid, $bid) {
+	$stmt = $dbconn->prepare("UPDATE cart SET quantity = quantity - 1 WHERE customer_id = :cid AND book_id = :bid");
+	$data = [":cid" => $cid, ":bid" => $bid];
+	$stmt->execute($data);
+}
+
+function addCartItem($dbconn, $cid, $bid) {
+	$up = $dbconn->prepare("UPDATE cart SET quantity = quantity + 1 WHERE customer_id = :cid AND book_id = :bid");
+	$val = 
+	[":bid" => $bid,
+	":cid" => $cid
+	];
+
+	$up->execute($val);
+}
+
+function checkout($dbconn, $cid) {
+	$stmt = $dbconn->prepare("DELETE FROM cart WHERE customer_id = :cid");
+	$stmt->bindParam(":cid", $cid);
+	$stmt->execute();
 }
 
 ?>

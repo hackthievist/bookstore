@@ -1,15 +1,14 @@
 <?php
-session_start();
 
+session_start();
+$page_title = "Home";
 include 'includes/db.php';
 include 'includes/functions.php';
-$id = $_SESSION['customer_id'];	
-
 include 'style.html';
 
 ?>
 
-<style>
+<!-- <style>
 
 	* {
 		margin: 0;
@@ -80,22 +79,22 @@ include 'style.html';
 		background-color: Tomato;
 	}
 
-</style>
 
-</head>
+</style> -->
+
 <body>
 
-	<div class="nav">
+	<!-- <div class="nav">
 		<div class="container">
 			<h2 id="logo">hackthievate.</h2>
 			<div class="links navbar-right">
 				<a href="">View Categories</a>
 				<a href="view_cart.php"><span class="glyphicon glyphicon-shopping-cart"></span> Cart</a>
-				<a><?php fetchName($conn, $id); ?></a>
+				<a><?//php fetchName($conn, $id); ?></a>
 			</div>
 		</div>
 
-	</div>
+	</div> -->
 
 	<div class="content">
 
