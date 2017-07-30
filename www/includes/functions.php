@@ -19,38 +19,53 @@ function doesEmailExist($dbconn, $input) {
 
 function insertIntoAdmin($dbconn, $clean) {
 
-	$hash = password_hash($clean['password'], PASSWORD_BCRYPT);
+	$st = $dbconn->prepare("SELECT * FROM admin WHERE email =:em");
+	$st->bindParam(":em", $clean['email']);
+	$st->execute();
 
-	$stmt = $dbconn->prepare("INSERT INTO admin(first_name, last_name, email, password, hash) VALUES (:fn, :ln, :em, :pw, :pwrd)");
-	$data = [
+	if($st->rowCount() == 0) {
+		$hash = password_hash($clean['password'], PASSWORD_BCRYPT);
 
-	":fn" => $clean['fname'],
-	":ln" => $clean['lname'],
-	":em" => $clean['email'],
-	":pw" => $clean['password'],
-	":pwrd" => $hash
+		$stmt = $dbconn->prepare("INSERT INTO admin(first_name, last_name, email, password, hash) VALUES (:fn, :ln, :em, :pw, :pwrd)");
+		$data = [
 
-	];
+		":fn" => $clean['fname'],
+		":ln" => $clean['lname'],
+		":em" => $clean['email'],
+		":pw" => $clean['password'],
+		":pwrd" => $hash
 
-	$stmt->execute($data);
+		];
+
+		$stmt->execute($data);
+	} else {
+		header("Location: register.php?email_exists");
+	}
 }
 
 function insertIntoCustomer($dbconn, $clean) {
 
-	$hash = password_hash($clean['password'], PASSWORD_BCRYPT);
+	$st = $dbconn->prepare("SELECT * FROM customer WHERE email =:em");
+	$st->bindParam(":em", $clean['email']);
+	$st->execute();
 
-	$stmt = $dbconn->prepare("INSERT INTO customer(first_name, last_name, email, password, hash) VALUES (:fn, :ln, :em, :pw, :pwrd)");
-	$data = [
+	if($st->rowCount() == 0) {
 
-	":fn" => $clean['fname'],
-	":ln" => $clean['lname'],
-	":em" => $clean['email'],
-	":pw" => $clean['password'],
-	":pwrd" => $hash
+		$hash = password_hash($clean['password'], PASSWORD_BCRYPT);
 
-	];
+		$stmt = $dbconn->prepare("INSERT INTO customer(first_name, last_name, email, password, hash) VALUES (:fn, :ln, :em, :pw, :pwrd)");
+		$data = [
 
-	$stmt->execute($data);
+		":fn" => $clean['fname'],
+		":ln" => $clean['lname'],
+		":em" => $clean['email'],
+		":pw" => $clean['password'],
+		":pwrd" => $hash
+
+		];
+
+		$stmt->execute($data);
+	}
 }
 
 function fetchName($dbconn, $cid) {
@@ -74,7 +89,6 @@ function displayErrors($errors, $field) {
 
 function login($dbconn, $input) {
 	$result = array();
-	//$hsh = password_verify($clean['password']. $row['hash']);
 
 	$stmt = $dbconn->prepare("SELECT * FROM admin WHERE email = :email"); 
 	$stmt->bindParam(":email", $input['email']);
@@ -118,6 +132,12 @@ function customerLogin($dbconn, $input) {
 function authenticate() {
 	if(!isset($_SESSION['admin_id'])) {
 		header("Location: login.php");
+	}
+}
+
+function layerProtect() {
+	if(!isset($_SESSION['customer_id'])) {
+		header("Location: clogin.php");
 	}
 }
 
@@ -171,6 +191,21 @@ $counter++;
 return $result;
 }
 
+function viewCategoryButtons($dbconn) {
+	$stmt = $dbconn->prepare("SELECT * FROM category");
+	$stmt->execute();
+	$colors = ["BlueViolet", "CadetBlue", "CornflowerBlue", "Crimson", "LightSteelBlue", "HotPink", "Tomato", "ForestGreen"];
+	
+
+	while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
+		$random = array_rand($colors, 1);
+		extract($row);
+		echo '<a style="color: black" href="home.php?id='.$category_id.'">
+		<button class="category-button" style="background-color:'.$colors[$random].'">'.$category_name.'</button></a>';
+
+	}
+}
+
 function checkURL($dbconn) {
 	if(isset($_GET['id']) && isset($_GET['name'])) {
 		$_SESSION['category_id'] = $_GET['id'];
@@ -200,23 +235,6 @@ function addProducts($dbconn, $input, $id, $image) {
 	} else {
 		echo "Book already exists";
 	}
-}
-
-function changeProduct($dbconn, $input, $id) {
-	$stmt = $dbconn->prepare("UPDATE products SET book_name=:bn,
-		author = :au,
-		publication_year = :yr,
-		price = :pr
-		WHERE book_id = :bid");
-
-	$data = [
-	":bn" => $input['title'],
-	":au" => $input['author'],
-	":yr" => $input['year'],
-	":pr" => $input['price']
-	];
-
-	$stmt->execute($data);
 }
 
 function updateCategory($dbconn, $input, $id) {
@@ -330,21 +348,19 @@ function updateBooks($dbconn, $input, $id, $destination) {
 
 	if($st->rowCount() == 0) {
 
-		echo "yes";
-		exit();
-
 		$stmt = $dbconn->prepare("UPDATE books SET book_name = :book_name, 
 			author = :auth,
 			publication_year = :py,
 			price = :pr,
-			filepath = :des");
+			filepath = :des WHERE book_id = :bid");
 
 		$data = 
 		[":book_name" => $input['title'],
 		":auth" => $input['author'],
 		":py" => $input['year'],
 		":pr" => $input['price'],
-		":des" => $destination
+		":des" => $destination,
+		":bid" => $id
 		];
 
 		$stmt->execute($data);
@@ -377,6 +393,46 @@ function displayBook($dbconn, $id) {
 function fetchBooks($dbconn) {
 	$result = "";
 	$stmt = $dbconn->prepare("SELECT * FROM books");
+	$stmt->execute();
+
+	$row_counter = 1;
+	$result .= '<div class="container">
+	<div class="row">';
+		while($row = $stmt->fetch(PDO::FETCH_BOTH)) {
+			extract($row);
+
+			if(($row_counter % 5) == 0) {
+				$result .= '<div class="row">';
+				$row_counter = 1;
+			}
+
+			$result .= 
+			'<div class="col-md-3">
+			<center>
+				<img style="min-height: 350px; height: 350px" class="img-thumbnail" src="'.$filepath.'"/>
+			</center>
+			<div class="caption">
+				<p class="title">'.$book_name.'</p>
+				<p>'.$author.'</p>
+				<p>₦'.$price.'</p>
+				<a href="cart.php?id='.$book_id.'"><button>Add To Cart</button></a>
+			</div>
+
+		</div>';
+
+		if($row_counter % 5 == 0) {
+			$result .= '</div>';
+		}
+
+		$row_counter++;
+	}
+	return $result;
+}
+
+function fetchBooksById($dbconn, $id) {
+	$result = "";
+	$stmt = $dbconn->prepare("SELECT * FROM books WHERE category_id = :cid");
+	$stmt->bindParam(":cid", $id);
 	$stmt->execute();
 
 	$row_counter = 1;
@@ -446,8 +502,7 @@ function addToCart($dbconn, $cid, $bid) {
 		];
 
 		$stmt->execute($data);
-		//$row = $st->fetch(PDO::FETCH_BOTH);
-		//extract($row);
+
 	}
 }
 
@@ -498,9 +553,9 @@ foreach($result as $res) {
 	<td><img style="min-height: 150px; height: 150px; width: 100px" src="'.$filepath.'"/></td>
 	<td>₦'.$price.'</td>
 	<td>'.$y.'</td>
-	<td><a style="border: none" href="addItem.php?id='.$res.'"><img style= "width:25px" src="add.png"/></a></td>
-	<td><a style="border: none" href="removeCartItem.php?id='.$res.'"><img style= "width:25px" src="minus.png"/></a></td>
-	<td><a style="border: none" href="deleteCartItem.php?id='.$res.'"><img style= "width:25px" src="trashb.png"/></a></td>
+	<td><a style="border: none" href="addItem.php?id='.$res.'"><img style= "width:25px" src="../icons & images/add.png"/></a></td>
+	<td><a style="border: none" href="removeCartItem.php?id='.$res.'"><img style= "width:25px" src="../icons & images/minus.png"/></a></td>
+	<td><a style="border: none" href="deleteCartItem.php?id='.$res.'"><img style= "width:25px" src="../icons & images/trashb.png"/></a></td>
 	<td>₦'.$price*$y.'</td>
 	<td></td>
 
